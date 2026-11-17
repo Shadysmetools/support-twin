@@ -283,3 +283,7 @@ Want a **hosted version**, **custom integrations** or **priority support**? Open
 maintainer's GitHub profile.
 
 Credits: see [CREDITS.md](CREDITS.md).
+
+---
+
+**Built by [Shady Al-Halawani](https://github.com/Shadysmetools)**, AI Product Manager & Tech Lead · [LinkedIn](https://www.linkedin.com/in/shady-al-halawani-333a5419a) · [Book a call](https://calendly.com/shady-al-halawani)
