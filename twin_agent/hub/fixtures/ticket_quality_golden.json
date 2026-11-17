@@ -1,0 +1,231 @@
+{
+  "_schema": {
+    "description": "Ticket-quality golden set: FICTIONAL clients and paraphrased messages only, no PII. Each case is turned into the Odoo ticket (title + description) and checked against the rubric in evalharness.TicketQualityEval.",
+    "rubric": [
+      "title has client + module + problem in plain English",
+      "every description section present, in order",
+      "original message preserved (escaped)",
+      "no invented facts (no attachments/steps/urgency the client did not give; module 'not identified' when unknown)",
+      "type and urgency correct"
+    ],
+    "item": {
+      "id": "",
+      "client": "fictional client name",
+      "partner_id": "synthetic id",
+      "kind": "text|voice|media",
+      "lang": "en|ar|mixed",
+      "input": "the client's message / transcript",
+      "translation": "the English a TicketWriter should give (fake writer fixture)",
+      "gt_type": "",
+      "gt_module": "module name or 'unknown'",
+      "gt_urgency": "High|not stated",
+      "attachments": "substrings expected in Attachments",
+      "steps": "steps the client gave",
+      "follow_up": "previous ticket id if a follow-up",
+      "context_modules": "client-context modules"
+    }
+  },
+  "items": [
+    {
+      "id": "T1",
+      "client": "Nile Trading Co",
+      "partner_id": 4101,
+      "kind": "text",
+      "input": "The inventory count shows the wrong quantity after I validate a delivery.\nSteps:\n1. Open a delivery\n2. Click Validate\n3. Check the on hand quantity",
+      "gt_type": "Bug",
+      "gt_module": "Inventory",
+      "gt_urgency": "not stated",
+      "steps": [
+        "Open a delivery",
+        "Click Validate",
+        "Check the on hand quantity"
+      ]
+    },
+    {
+      "id": "T2",
+      "client": "Delta Foods",
+      "partner_id": 4102,
+      "kind": "text",
+      "input": "Please add a new report in Accounting for monthly VAT totals",
+      "gt_type": "New Request",
+      "gt_module": "Accounting",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T3",
+      "client": "Orion Logistics",
+      "partner_id": 4103,
+      "kind": "text",
+      "input": "We need to enable lot tracking in the Inventory settings for the cold store",
+      "gt_type": "Configuration",
+      "gt_module": "Inventory",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T4",
+      "client": "Palm Textiles",
+      "partner_id": 4104,
+      "kind": "text",
+      "input": "How do I print a delivery slip from Sales?",
+      "gt_type": "Inquiries",
+      "gt_module": "Sales",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T5",
+      "client": "Cedar Clinics",
+      "partner_id": 4105,
+      "kind": "text",
+      "input": "Please customize the invoice layout and modify the footer text",
+      "gt_type": "Customization",
+      "gt_module": "Accounting",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T6",
+      "client": "Nile Trading Co",
+      "partner_id": 4101,
+      "kind": "text",
+      "input": "URGENT: the POS crashes when cashiers click new order, see https://example.test/pos-error.png",
+      "gt_type": "Bug",
+      "gt_module": "POS",
+      "gt_urgency": "High",
+      "attachments": [
+        "Link: https://example.test/pos-error.png"
+      ]
+    },
+    {
+      "id": "T7",
+      "client": "Delta Foods",
+      "partner_id": 4102,
+      "kind": "text",
+      "input": "Something is not working on the screen, it shows an error",
+      "gt_type": "Bug",
+      "gt_module": "unknown",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T8",
+      "client": "Orion Logistics",
+      "partner_id": 4103,
+      "kind": "text",
+      "lang": "ar",
+      "input": "عندي مشكلة في المخزون، الكمية ظاهرة غلط بعد ما عملت تسليم",
+      "translation": "I have a problem in inventory: the quantity shows wrong after I made a delivery",
+      "gt_type": "Bug",
+      "gt_module": "Inventory",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T9",
+      "client": "Palm Textiles",
+      "partner_id": 4104,
+      "kind": "voice",
+      "lang": "ar",
+      "input": "عاجل: الفاتورة مش بتتطبع من المبيعات، الشغل واقف",
+      "translation": "Urgent: the invoice does not print from Sales, work is stopped",
+      "gt_type": "Bug",
+      "gt_module": "Sales",
+      "gt_urgency": "High",
+      "attachments": [
+        "Voice note"
+      ]
+    },
+    {
+      "id": "T10",
+      "client": "Cedar Clinics",
+      "partner_id": 4105,
+      "kind": "text",
+      "lang": "ar",
+      "input": "عايز تقرير جديد في المبيعات يوضح إجمالي المبيعات الشهرية",
+      "translation": "I want a new report in Sales showing the monthly sales total",
+      "gt_type": "New Request",
+      "gt_module": "Sales",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T11",
+      "client": "Nile Trading Co",
+      "partner_id": 4101,
+      "kind": "text",
+      "lang": "ar",
+      "input": "إزاي أعمل تقرير في المحاسبة؟",
+      "translation": "How do I make a report in Accounting?",
+      "gt_type": "Inquiries",
+      "gt_module": "Accounting",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T12",
+      "client": "Delta Foods",
+      "partner_id": 4102,
+      "kind": "text",
+      "lang": "mixed",
+      "input": "Hi, the Purchase order screen مش بيفتح, it shows an error",
+      "translation": "Hi, the Purchase order screen does not open, it shows an error",
+      "gt_type": "Bug",
+      "gt_module": "Purchase",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T13",
+      "client": "Orion Logistics",
+      "partner_id": 4103,
+      "kind": "media",
+      "media_type": "image",
+      "input": "screenshot of the stock error",
+      "gt_type": "Bug",
+      "gt_module": "Inventory",
+      "gt_urgency": "not stated",
+      "attachments": [
+        "image received"
+      ]
+    },
+    {
+      "id": "T14",
+      "client": "Palm Textiles",
+      "partner_id": 4104,
+      "kind": "text",
+      "input": "The VAT report we discussed still shows wrong totals in Accounting",
+      "gt_type": "Bug",
+      "gt_module": "Accounting",
+      "gt_urgency": "not stated",
+      "follow_up": 4812
+    },
+    {
+      "id": "T15",
+      "client": "Cedar Clinics",
+      "partner_id": 4105,
+      "kind": "text",
+      "lang": "ar",
+      "input": "محتاج تفعيل صلاحية المخازن للمستخدم الجديد",
+      "translation": "I need the warehouse permission enabled for the new user",
+      "gt_type": "Configuration",
+      "gt_module": "Inventory",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T16",
+      "client": "Nile Trading Co",
+      "partner_id": 4101,
+      "kind": "text",
+      "input": "<script>alert(1)</script> the inventory is wrong after the count",
+      "gt_type": "Bug",
+      "gt_module": "Inventory",
+      "gt_urgency": "not stated"
+    },
+    {
+      "id": "T17",
+      "client": "Delta Foods",
+      "partner_id": 4102,
+      "kind": "text",
+      "input": "It does not work, it fails when I save",
+      "gt_type": "Bug",
+      "gt_module": "Helpdesk",
+      "gt_urgency": "not stated",
+      "context_modules": [
+        "Helpdesk"
+      ]
+    }
+  ]
+}

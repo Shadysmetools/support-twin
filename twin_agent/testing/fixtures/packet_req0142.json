@@ -1,0 +1,13 @@
+{"request_id": "REQ-0142", "class": "RB stray-in-line", "tier": "T2a", "company": "EG",
+ "understanding": "WAVE/00001 will not validate: IN/00001/26 has a 0-demand line with no PO line",
+ "evidence": [{"kind": "runbook", "id": "stray-in-line", "status": "confirmed"},
+              {"kind": "odoo_read", "model": "stock.move", "id": "1", "field": "product_uom_qty", "value": 0},
+              {"kind": "past_answer", "source": "runbook occurrence 2026-10-07 IN/00002/26"}],
+ "verified": true,
+ "draft_reply": {"channel": "telegram_group", "lang": "en", "text": "Checking it, 10 min."},
+ "after_fix_reply": "Try again now.",
+ "proposed_action": {"type": "run_this", "records": ["stock.move 1"], "approver": "exempt: runbook single-record",
+                     "script": "work/REQ-0142/fix.py", "sha256": "0000"},
+ "ticket_draft": null, "questions_for_principal": [],
+ "runbook_occurrence": {"entry": "stray-in-line", "date": "2026-10-15", "record": "IN/00001/26", "status": "confirmed"},
+ "note": "REQ-0142: stray 0-qty line on IN/00001/26; fix card sent; waiting for Principal.", "confidence": 0.86}

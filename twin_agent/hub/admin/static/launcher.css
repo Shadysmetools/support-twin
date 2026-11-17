@@ -1,0 +1,6 @@
+body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:560px;margin:60px auto;padding:0 20px;color:#1b1b1b}
+h1{font-size:22px} p{line-height:1.5}
+button{background:#1877f2;color:#fff;border:0;border-radius:6px;padding:14px 22px;font-size:16px;cursor:pointer}
+button:disabled{background:#9db8e6;cursor:default}
+#status{margin-top:24px;font-weight:600}
+.bad{color:#9b1c1c;font-weight:600}

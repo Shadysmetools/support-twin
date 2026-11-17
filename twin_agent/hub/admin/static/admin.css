@@ -1,0 +1,32 @@
+*{box-sizing:border-box}
+body{font:15px/1.5 system-ui,"Segoe UI",Arial,sans-serif;margin:0;color:#1b1b1b;background:#f6f7f9}
+header{background:#14213d;color:#fff;padding:12px 24px}
+header .sub{opacity:.75;margin-left:10px;font-size:13px}
+.banner{background:#fff3cd;color:#664d03;padding:8px 24px;font-weight:600;border-bottom:1px solid #e6d27a}
+nav{background:#fff;border-bottom:1px solid #dde1e6;padding:0 24px;display:flex;gap:4px;align-items:center}
+nav a{padding:12px 14px;color:#14213d;text-decoration:none;border-bottom:3px solid transparent}
+nav a.on{border-bottom-color:#1877f2;font-weight:600}
+nav .who{margin-left:auto;display:flex;gap:12px;align-items:center}
+main{max-width:980px;margin:24px auto;padding:0 24px}
+h1{font-size:22px;margin:0 0 16px} h2{font-size:16px;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #dde1e6}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #eceff3;vertical-align:top}
+th{background:#f0f2f5;font-size:13px}
+button{background:#1877f2;color:#fff;border:0;border-radius:6px;padding:10px 18px;font-size:15px;cursor:pointer}
+button:disabled{background:#9db8e6;cursor:default}
+button.plain{background:#fff;color:#14213d;border:1px solid #b8c0cc}
+button.link{background:none;color:#1877f2;padding:0}
+form.inline{display:inline}
+.card{background:#fff;border:1px solid #dde1e6;padding:20px;max-width:360px;display:flex;flex-direction:column;gap:12px}
+label{display:flex;flex-direction:column;gap:4px;font-weight:600}
+input,textarea{font:inherit;padding:8px;border:1px solid #b8c0cc;border-radius:6px;width:100%}
+.flash{padding:10px 14px;border-radius:6px;margin:0 0 16px}
+.flash.ok{background:#d1e7dd;color:#0a3622}.flash.bad{background:#f8d7da;color:#58151c}
+.muted{color:#5b6573}
+.tag{background:#fff3cd;color:#664d03;border-radius:4px;padding:2px 8px;font-size:12px;font-weight:700}
+.draft{background:#fff;border:1px solid #dde1e6;padding:16px}
+.draft pre{white-space:pre-wrap;background:#f6f7f9;padding:10px}
+.row{display:flex;gap:8px;margin-top:10px}
+blockquote{margin:0 0 8px;padding:10px 14px;background:#fff;border-left:4px solid #1877f2}
+.timeline{padding-left:20px}.timeline .ts{color:#5b6573;font-size:13px;margin-right:8px}
+.tag.warn{background:#f8d7da;color:#58151c}

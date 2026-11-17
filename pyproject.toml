@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "support-twin"
+version = "0.1.0"
+description = "Self-hostable engine for a human-in-the-loop AI digital twin of a support agent (helpdesk, mail, Telegram, WhatsApp, Odoo)."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Shady Al-Halawani" }]
+requires-python = ">=3.12"
+keywords = ["support", "helpdesk", "ai-agent", "digital-twin", "human-in-the-loop", "odoo", "telegram", "claude"]
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications",
+    "Topic :: Office/Business",
+]
+# Core: enough to import every module, run the hub in dry_run and run the unit tests.
+dependencies = [
+    "pyyaml>=6",
+    "tzdata>=2024.1",
+    "httpx>=0.27",
+    "requests>=2.32",
+    "pyjwt[crypto]>=2.8",
+]
+
+[project.optional-dependencies]
+# Real adapters (imported lazily; only needed when run_mode is live and the integration is enabled)
+live = [
+    "telethon>=1.36",
+    "python-telegram-bot>=21",
+    "keyring>=25",
+    "google-api-python-client>=2.130",
+    "google-auth-oauthlib>=1.2",
+    "google-auth-httplib2>=0.2",
+    "pymupdf>=1.24",
+    "groq>=0.11",
+    "pywin32>=306; sys_platform == 'win32'",
+]
+browser = ["playwright>=1.45"]
+test = ["pytest>=8"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/support-twin"
+
+[project.scripts]
+support-twin = "twin_agent.cli:main"
+twin-agent-listener = "twin_agent.listener:main"
+twin-agent-creds = "twin_agent.creds:main"
+
+[tool.setuptools.packages.find]
+include = ["twin_agent*"]
+
+[tool.setuptools.package-data]
+twin_agent = ["worker/*.json", "worker/*.md", "worker/prompts/*.md", "testing/fixtures/*", "hub/fixtures/*", "hub/admin/static/*", "hub/persona/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "arabic_on: enable the (disabled) Arabic client strings for this test",
+    "live: needs a live external service, an optional SDK or a Windows-only tool (skipped when unavailable)",
+]

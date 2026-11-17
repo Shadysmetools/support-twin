@@ -1,0 +1,41 @@
+# Quickstart home (install scripts)
+.twin/
+
+# Generated runtime data (state.db, kb.db, logs, work folders, proof videos)
+data/
+logs/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+
+# Secrets and sessions: never in git
+*.session
+*.session-journal
+.env
+.env.*
+!.env.example
+secrets/
+vault/
+consent/
+config/consent.yaml
+config.yaml
+!config.example.yaml
+client_secret*.json
+token*.json
+STOP
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# staging runner: local config and state (never committed)
+/staging.yaml
+/staging-state/

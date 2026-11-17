@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]          # the verified platform; Linux/macOS are best-effort
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install (quickstart script)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/install.ps1 -PythonExe python -PythonArgs @()
+      - name: Install (quickstart script)
+        if: runner.os != 'Windows'
+        run: bash scripts/install.sh
+      - name: Demo (synthetic, no network)
+        shell: bash
+        run: |
+          if [ -x .venv/bin/support-twin ]; then .venv/bin/support-twin demo --fast; else .venv/Scripts/support-twin.exe demo --fast; fi
+      - name: Tests
+        shell: bash
+        run: |
+          if [ -x .venv/bin/python ]; then PY=.venv/bin/python; else PY=.venv/Scripts/python.exe; fi
+          $PY -m pytest -q -p no:cacheprovider

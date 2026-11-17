@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Card sent to Principal by the 'Principal's Agent' bot. Code check: twin_agent.schemas.validate_card",
+  "type": "object",
+  "required": ["kind", "text"],
+  "properties": {
+    "kind": {"enum": ["new_request", "run_this", "autopilot_happened", "observe_would_send", "ticket", "proof_ready",
+                      "digest", "promotion", "demotion", "health", "reminder", "escalation", "stalled",
+                      "holding_blocked", "circuit_breaker", "could_not_verify", "edit_echo", "done", "info"]},
+    "text": {"type": "string", "minLength": 1, "maxLength": 3500},
+    "request_id": {"type": ["string", "null"], "pattern": "^REQ-[0-9]{4,}(-[a-c])?$"},
+    "buttons": {"type": "array", "items": {"type": "array", "items": {"type": "object", "required": ["label", "action"],
+      "properties": {"label": {"type": "string"}, "action": {"type": "string", "pattern": "^[a-z0-9]{2,3}$"}}}}},
+    "to": {"enum": ["principal", "backup"]},
+    "silent": {"type": "boolean"},
+    "attachments": {"type": "array", "items": {"type": "string"}},
+    "expires_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

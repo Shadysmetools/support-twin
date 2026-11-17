@@ -1,0 +1,66 @@
+# Production hub config (no secrets here). Copy to ~/.claude/aa-prod/production.yaml (outside git).
+# Run:  python -m twin_agent.hub.production preflight --config ~/.claude/aa-prod/production.yaml
+#       python -m twin_agent.hub.production serve     --config ~/.claude/aa-prod/production.yaml
+# Full guide: docs/PRODUCTION-RUNNER.md. Every key below is optional except phone_number_id and staff_approver_id.
+
+# Executive's number: its Meta phone_number_id (a config value; the number itself is never written here).
+# The TEST number (id 1000000000011 / 15550100099) is refused anywhere in this file.
+phone_number_id: ""
+display_phone_number: ""            # optional, informational
+
+team_id: 2                          # Helpdesk Support
+automation_uid: 82                  # odoo-riley; startup refuses if the Odoo login is any other uid
+default_owner_uid: 82               # Riley: the default responder when no better owner is found
+backup_owner_uid: 0                 # Supervisor's Odoo uid (fill it in); used when the default is in unavailable_owner_uids
+unavailable_owner_uids: []
+odoo_secret_file: "~/.claude/secrets/odoo-riley.json"
+
+# Loopback only. cloudflared connects to these (webhook only on the tunnel; admin stays local).
+bind_host: "127.0.0.1"
+webhook_port: 8890
+admin_port: 8891
+public_host: "app.example.com"      # tunnel exposes ONLY ^/webhook$ and ^/healthz$
+
+staff_approver_id: 0                # the admin user's approver id (init-users writes the users file with it)
+client_channel: "whatsapp"
+
+# INTAKE first: with intake_ref set, messages become real tickets (and safe Teamhub lines) even while the ack is off.
+# Blank = NOT accepting: signed events get 503 (Meta retries), nothing is stored.
+intake_ref: ""                      # e.g. "Sysadmin override 16 Nov, pending formal PDPL sign-off"
+expected_phone_number_id: ""        # optional typo guard: must equal phone_number_id when set
+
+# The instant ack (the only automatic client message). Needs BOTH, and intake_ref. Messages that arrived before it was
+# switched on never get a late ack.
+send_enabled: false
+go_live_ref: ""
+
+# REQUIRED for a real serve (held messages are posted to Teamhub). An existing config.yaml with teamhub_tickets: filter team_id
+# must equal team_id, no "TEST" name filter, and state_dir INSIDE production's own folder (never staging's).
+# Real tickets get SAFE SUMMARIES only (never client text, never an approval card) plus a link to the approve page.
+teamhub_config: ""
+teamhub_interval_s: 120
+teamhub_timeout_s: 120
+tick_interval_s: 60
+
+# Paths (defaults shown; staging's paths are refused):
+# state_db: ~/.claude/aa-prod/hub-production.db
+# app_secret_file: ~/.claude/secrets/meta-acme-app.json
+# system_user_file: ~/.claude/secrets/meta-acme-system-user.json
+# verify_token_file: ~/.claude/secrets/aa-prod-verify-token.txt      (created on first run, never printed)
+# users_file: ~/.claude/secrets/aa-prod-admin-users.json
+# business_dir: ~/.claude/secrets/aa-prod-meta-businesses            (the production Meta token store)
+
+# Per-person Odoo keys (as built in odoo_people.py). Intake runs as odoo-riley (automation_uid); notes run as the ticket
+# owner's own key. Key = the file <name>.json in the same folder as odoo_secret_file. A missing key BLOCKS (no fallback).
+# odoo_people: {81: "odoo-supervisor"}
+# odoo_tg_people: {}                 # approver Telegram id -> Odoo uid (reassign)
+
+# Public admin page behind Cloudflare Access (the hub verifies the token itself). Each email needs a matching hub user.
+# public_admin: true
+# admin_public_host: "admin.example.com"
+# access_file: ~/.claude/secrets/aa-prod-access.json     # {"team_domain": "...cloudflareaccess.com", "aud": "..."}
+# access_users: {sysadmin@example.com: sysadmin, supervisor@example.com: supervisor}   # EVERY allowed email -> its own hub user
+# access_emails: [sysadmin@example.com, info@example.com, hsa@example.com, riley@example.com, supervisor@example.com, principal.doe@globex.example.net]
+
+# The team's own phones: {"staff": {"name": "digits"}}. A message from one is held as "staff number" (no ticket, no ack).
+# staff_phones_file: ~/.claude/secrets/twin-team-phones.json

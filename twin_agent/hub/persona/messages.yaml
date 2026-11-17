@@ -1,0 +1,107 @@
+# The SINGLE source of every fixed client-facing string the hub sends (SUPPORT-PERSONA-2026-11-17).
+# Loaded and validated at startup (persona/__init__.py): a missing key, a missing language or a wrong placeholder stops the hub.
+# ENGLISH ONLY for now (Sysadmin, 17 Nov): the Arabic strings are kept but disabled until `client_languages` includes "ar"
+# AND Riley/Supervisor have reviewed them (needs_native_review).
+client_languages: [en]
+
+sign:
+  en: "— Acme Support"
+  ar: "— دعم Acme"
+  needs_native_review: true
+
+issue_fallback:
+  en: "a problem"
+  ar: "مشكلة"
+  needs_native_review: true
+
+issue_prefix:
+  en: "an issue where "
+  ar: ""
+  needs_native_review: true
+
+messages:
+  company_question:
+    fields: []
+    en: "Hello! Thank you for contacting Acme Support. Which company are you with?"
+    ar: "أهلاً بك! شكراً لتواصلك مع دعم Acme. ما اسم شركتك؟"
+    needs_native_review: true
+
+  company_reask:
+    fields: []
+    en: "Sorry, we did not catch that. Could you please tell us the name of your company?"
+    ar: "عذراً، لم نفهم. هل يمكنك كتابة اسم شركتك من فضلك؟"
+    needs_native_review: true
+
+  confirmation_anon:
+    fields: [n, subject, sign]
+    en: "Thank you. We've opened ticket #{n} – {subject} for you. Our team will reach out if we have any questions about your request. {sign}"
+    ar: "شكراً. تم فتح التذكرة رقم #{n} – {subject}. سيتواصل معك فريقنا إذا احتجنا أي تفاصيل إضافية. {sign}"
+    needs_native_review: true
+
+  type_prompt:
+    fields: []
+    en: "Thanks! Please choose the type of your request:"
+    ar: "شكراً! من فضلك اختر نوع طلبك:"
+    needs_native_review: true
+
+  confirmation:
+    fields: [name, n, subject, sign]
+    en: "Thank you, {name}. We've opened ticket #{n} – {subject} for you. Our team will reach out if we have any questions about your request. {sign}"
+    ar: "شكراً {name}. تم فتح التذكرة رقم #{n} – {subject}. سيتواصل معك فريقنا إذا احتجنا أي تفاصيل إضافية. {sign}"
+    needs_native_review: true
+
+  feature_brief:
+    fields: []
+    en: "To build this right, could you please send a short voice note, video, or PDF describing what you need?"
+    ar: "حتى ننفذ طلبك بالشكل الصحيح، هل يمكنك إرسال رسالة صوتية قصيرة أو فيديو أو ملف PDF يشرح ما تحتاجه؟"
+    needs_native_review: true
+
+  evidence:
+    fields: []
+    en: "Could you please send a screenshot or a short screen recording showing the issue?"
+    ar: "هل يمكنك إرسال لقطة شاشة أو تسجيل قصير يوضح المشكلة؟"
+    needs_native_review: true
+
+  meeting:
+    fields: []
+    en: "Of course – our team will contact you to arrange a meeting."
+    ar: "بالتأكيد – سيتواصل معك فريقنا لترتيب موعد الاجتماع."
+    needs_native_review: true
+
+  fallback_ack:
+    fields: [name, sign]
+    en: "Hello {name}, thanks, we've got your message and a specialist will reply shortly. {sign}"
+    ar: "أهلاً {name}، شكراً لتواصلك معنا. وصلتنا رسالتك وهيرد عليك أحد المتخصصين قريباً. {sign}"
+    needs_native_review: true
+
+  # Confirm-understanding draft: ONE line that restates the issue, then ONE question.
+  confirm:
+    fields: [who, issue, place, sign]
+    en: "Hello {who}, to make sure we solve the right thing: you're seeing {issue}{place}. Is that correct? {sign}"
+    ar: "أهلاً {who}، عشان نتأكد إننا بنحل النقطة الصح: حضرتك بتواجه {issue}{place}. صح كده؟ {sign}"
+    needs_native_review: true
+
+  # Same, when we still need ONE thing from the client (only one question per message: the "?" is on the need, not added).
+  confirm_need:
+    fields: [who, issue, place, need, sign]
+    en: "Hello {who}, to make sure we solve the right thing: you're seeing {issue}{place}. Before we start, could you please share {need}? {sign}"
+    ar: "أهلاً {who}، عشان نتأكد إننا بنحل النقطة الصح: حضرتك بتواجه {issue}{place}. قبل ما نبدأ، ممكن تبعتلنا {need}؟ {sign}"
+    needs_native_review: true
+
+  resolve:
+    fields: [who, n, what, link]
+    en: "Hello {who}, your request (ticket #{n}) is resolved: {what}. You can check it here: {link}. If anything still looks off, just reply and we'll reopen it. Thank you for your patience."
+    ar: "أهلاً {who}، طلبك (تذكرة #{n}) اتحل: {what}. تقدر تتأكد من هنا: {link}. لو لسه في حاجة مش مظبوطة، ردّ علينا وهنفتحها تاني. شكراً لسعة صدرك."
+    needs_native_review: true
+
+  resolve_video:
+    fields: [video, step]
+    en: "Here's a short video showing it working: {video}. {step}."
+    ar: "ده فيديو قصير بيوضّح إنها شغّالة: {video}. {step}."
+    needs_native_review: true
+
+  verify_step:
+    fields: []
+    en: "Open the video and verify the step"
+    ar: "افتح الفيديو واتأكد من الخطوة"
+    needs_native_review: true

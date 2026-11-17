@@ -1,0 +1,145 @@
+{
+ "name": "Test Group",
+ "type": "private_supergroup",
+ "id": 500,
+ "messages": [
+  {
+   "id": 1,
+   "type": "message",
+   "date": "2026-10-28T14:40:03",
+   "date_unixtime": "0",
+   "from": "Staff A",
+   "from_id": "user2001",
+   "text": "",
+   "text_entities": [],
+   "photo": "photos/photo_1.jpg",
+   "reply_to_message_id": 7
+  },
+  {
+   "id": 2,
+   "type": "message",
+   "date": "2026-10-28T14:40:40",
+   "date_unixtime": "0",
+   "from": "Staff A",
+   "from_id": "user2001",
+   "text": "WAVE/00001",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "WAVE/00001"
+    }
+   ],
+   "reply_to_message_id": 7
+  },
+  {
+   "id": 3,
+   "type": "message",
+   "date": "2026-10-28T14:41:10",
+   "date_unixtime": "0",
+   "from": "Staff A",
+   "from_id": "user2001",
+   "text": "Principal",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Principal"
+    }
+   ],
+   "reply_to_message_id": 7
+  },
+  {
+   "id": 4,
+   "type": "message",
+   "date": "2026-10-28T14:58:00",
+   "date_unixtime": "0",
+   "from": "Principal Test",
+   "from_id": "user1001",
+   "text": "Checking it, 10 min.",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Checking it, 10 min."
+    }
+   ],
+   "reply_to_message_id": 2
+  },
+  {
+   "id": 5,
+   "type": "message",
+   "date": "2026-10-28T15:20:00",
+   "date_unixtime": "0",
+   "from": "Principal Test",
+   "from_id": "user1001",
+   "text": "Try again now.",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Try again now."
+    }
+   ],
+   "reply_to_message_id": 2
+  },
+  {
+   "id": 6,
+   "type": "message",
+   "date": "2026-10-28T17:30:00",
+   "date_unixtime": "0",
+   "from": "Staff A",
+   "from_id": "user2001",
+   "text": "tamam",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "tamam"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "type": "message",
+   "date": "2026-10-29T21:10:00",
+   "date_unixtime": "0",
+   "from": "Staff B",
+   "from_id": "user2002",
+   "text": "Batch BATCH/00009 will not validate, quantity mismatch",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Batch BATCH/00009 will not validate, quantity mismatch"
+    }
+   ],
+   "reply_to_message_id": 9
+  },
+  {
+   "id": 10,
+   "type": "message",
+   "date": "2026-10-30T10:20:00",
+   "date_unixtime": "0",
+   "from": "Principal Test",
+   "from_id": "user1001",
+   "text": "Send the validation error please, and the batch number.",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Send the validation error please, and the batch number."
+    }
+   ],
+   "reply_to_message_id": 8
+  },
+  {
+   "id": 11,
+   "type": "message",
+   "date": "2026-10-30T11:00:00",
+   "date_unixtime": "0",
+   "from": "Bot X",
+   "from_id": "user3001",
+   "text": "NO_REPLY",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "NO_REPLY"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,16 @@
+# Experimental. `docker compose run --rm twin` runs the synthetic demo; `docker compose run --rm twin doctor`
+# shows the resolved profile. Your config lives in the twin-data volume (/data/config/config.yaml).
+services:
+  twin:
+    build: .
+    image: support-twin:local
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      TWIN_AGENT_HOME: /data
+    volumes:
+      - twin-data:/data
+    command: ["demo"]
+volumes:
+  twin-data:

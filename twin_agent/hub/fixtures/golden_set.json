@@ -1,0 +1,61 @@
+{
+  "_schema": {
+    "description": "§16a golden eval set: REDACTED past tickets, synthetic clients only, no PII.",
+    "item": {
+      "id": "stable id",
+      "input": "the customer's message (paraphrased/redacted)",
+      "lang": "en|ar",
+      "gt_type": "ground-truth ticket type (Bug|New Request|Customization|Configuration|Inquiries)",
+      "gt_owner_uid": "ground-truth owner res.users id (synthetic)",
+      "gt_answer": "ground-truth resolution summary (redacted)",
+      "client_context": "merged knowledge-source context used by routing (owner_uids, modules, type_owner)"
+    }
+  },
+  "items": [
+    {
+      "id": "G1",
+      "input": "The POS screen won't open, it crashes when I click new order",
+      "lang": "en",
+      "gt_type": "Bug",
+      "gt_owner_uid": 777,
+      "gt_answer": "Cleared the cached session; POS opens normally.",
+      "client_context": {"owner_uids": [], "modules": []}
+    },
+    {
+      "id": "G2",
+      "input": "Please add a new report in Accounting for monthly VAT totals",
+      "lang": "en",
+      "gt_type": "New Request",
+      "gt_owner_uid": 778,
+      "gt_answer": "Scoped a new VAT summary report; delivered on staging.",
+      "client_context": {"owner_uids": [], "modules": []}
+    },
+    {
+      "id": "G3",
+      "input": "How do I configure user permissions in HR?",
+      "lang": "en",
+      "gt_type": "Configuration",
+      "gt_owner_uid": 777,
+      "gt_answer": "Walked through access groups; permissions set.",
+      "client_context": {"owner_uids": [777], "modules": ["HR"]}
+    },
+    {
+      "id": "G4",
+      "input": "عايز اضيف خاصية جديدة في المخزون للجرد",
+      "lang": "ar",
+      "gt_type": "New Request",
+      "gt_owner_uid": 778,
+      "gt_answer": "Scoped stock-count feature; added to the backlog.",
+      "client_context": {"owner_uids": [778], "modules": ["Inventory"]}
+    },
+    {
+      "id": "G5",
+      "input": "إزاي اعمل عرض سعر في المبيعات؟",
+      "lang": "ar",
+      "gt_type": "Inquiries",
+      "gt_owner_uid": 777,
+      "gt_answer": "Shared the quotation how-to steps.",
+      "client_context": {"owner_uids": [], "modules": []}
+    }
+  ]
+}

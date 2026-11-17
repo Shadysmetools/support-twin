@@ -1,0 +1,52 @@
+# Staging hub config (no secrets here). Copy to staging.yaml, which stays out of git.
+# Run:  python -m twin_agent.hub.staging check --config staging.yaml
+#       python -m twin_agent.hub.staging serve --config staging.yaml            (add --dry-run to rehearse with fakes)
+
+# The Acme TEST number (+1 555-010-0099) on our own WABA. Any other id is refused (Executive's number most of all).
+phone_number_id: "1000000000011"
+waba_id: "1000000000012"
+display_phone_number: "15550100099"
+
+# The pinned TEST contact (res.partner "TEST Client (Support Twin)", no email/phone). Live id at the time of writing: 1187.
+test_partner_id: 1187
+
+# wa_id allowlist (digits only, country code first). EMPTY = nothing is processed and nothing is sent.
+# Put the tester phones here on the laptop only; never commit real numbers.
+allowed_senders: []
+
+# Loopback only. Three local ports; cloudflared connects to them (see docs/STAGING-RUNNER.md).
+bind_host: "127.0.0.1"
+webhook_port: 8790
+admin_port: 8791
+launcher_port: 8792
+public_host: "staging.example.com"            # only /webhook is exposed here (unless public_admin)
+launcher_host: "signup.staging.example.com"   # Embedded Signup launcher: its OWN origin
+
+# The admin page is local-only (http://127.0.0.1:8791). Putting it on the tunnel needs BOTH of these, and Cloudflare Access
+# (see docs/STAGING-RUNNER.md); check/serve refuse public_admin without cloudflare_access.
+public_admin: false
+cloudflare_access: false
+
+# The admin user's approver id (init-users writes the users file with this id; the hub trusts only this id).
+staff_approver_id: 90001
+
+# Real WhatsApp sending is OFF until you turn it on here, explicitly. consent_ref says why it is allowed
+# (own TEST number, allowlisted testers who agreed).
+send_enabled: false
+consent_ref: ""
+
+# Optional: an existing config.yaml that has a teamhub_tickets section (room, workflow, filter team 2 + "TEST · %").
+# "" = Teamhub watcher off. The press processor is never run by staging.
+teamhub_config: ""
+teamhub_interval_s: 120
+
+# Where the hub keeps its state (SQLite). One hub process per file.
+# state_db defaults to ~/.claude/aa-staging/hub-staging.db (user profile, not the worktree)
+
+# Secrets files default to ~/.claude/secrets/ (app secret, system-user token, Odoo key, verify token, admin users).
+# Override only if you keep them elsewhere:
+# app_secret_file: ...
+# system_user_file: ...
+# odoo_secret_file: ...
+# verify_token_file: ...
+# users_file: ...

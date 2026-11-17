@@ -1,0 +1,19 @@
+{
+  "_comment": "Deny-by-default settings for worker sessions (05 1.2). Copied to C:/TwinAgent/config. The spawner adds absolute Read denies for this install's private folders at run time (worker-settings.effective.json).",
+  "permissions": {
+    "defaultMode": "default",
+    "allow": ["Read", "Grep", "Glob", "mcp__kb_search__*", "mcp__tg_history__*", "mcp__submit_packet__*"],
+    "deny": ["Bash", "PowerShell", "Write", "Edit", "NotebookEdit", "WebFetch", "WebSearch", "mcp__odoo-ro__*",
+             "mcp__telegram-ro__*", "mcp__gmail-ro__*", "mcp__claude-in-chrome__*", "mcp__playwright__*",
+             "mcp__odoo-stagelatest__*",
+             "Read(**/vault/**)", "Read(**/.globex-secrets/**)", "Read(**/consent/**)",
+             "Read(**/data/state/**)", "Read(**/data/logs/**)", "Read(**/claude-config/**)", "Read(**/*.session)",
+             "Read(**/.env*)",
+             "Read(**/browser/**)", "Read(**/data/monitor/**)", "Read(**/data/watcher/**)", "Read(**/data/kb/**)",
+             "Read(**/History)", "Read(**/Cookies)",
+             "Read(~/.claude/**)", "Read(~/.ssh/**)", "Read(~/.globex-secrets/**)", "Read(~/AppData/**)",
+             "Read(~/Claude/**)"]
+  },
+  "disableAllHooks": false,
+  "enableAllProjectMcpServers": false
+}

@@ -1,0 +1,531 @@
+# support-twin configuration (example). The install scripts copy it to $TWIN_AGENT_HOME/config/config.yaml.
+# Never commit the filled copy. Ids that identify people or chats are 0 / empty here on purpose.
+# Glossary: the PRINCIPAL is the human support agent the twin works for; only the principal's tap sends to a client.
+# SUPERVISOR = the helpdesk manager who gates client-emailing stages; BACKUPS get info cards and "take over".
+
+# ---------------------------------------------------------------- persona / organisation profile
+# Every company, client, mailbox and host the engine needs. Read by twin_agent/profile.py (defaults: the fictional
+# Acme Support team helping the fictional client Globex). Change these first when you create your own twin.
+profile:
+  principal_name: "Alex"                  # the human the twin is a twin of
+  twin_name: "Digital Twin"
+  company_name: "Acme Support"            # your support organisation
+  our_domains: ["example.com"]            # your mail domains (sub-domains match too)
+  helpdesk_email: "help@example.com"      # the helpdesk mailbox tickets are filed to
+  helpdesk_host: "helpdesk.example.com"   # your Odoo helpdesk host: API only, never opened in a browser
+  client_name: "Globex"                   # the client your principal supports
+  client_companies: ["EG", "KSA"]         # client company codes that get their own ticket tag
+  banned_tenant_keywords: ["globex"]      # Odoo tenant hosts a browser must never open
+  access_emails:                          # exact addresses allowed through the production access gate
+    ["sysadmin@example.com", "info@example.com", "hsa@example.com", "riley@example.com",
+     "supervisor@example.com", "principal.doe@globex.example.net"]
+  protected_numbers: ["15550009999"]      # phone numbers the staging rails refuse anywhere
+
+# ---------------------------------------------------------------- engine
+
+# dry_run: every external adapter is a fake or dry-run (no network). live: real adapters for reading;
+# sending is still gated by send_enabled, the lane dials, consent and the guards.
+run_mode: dry_run
+# The hub's TEAM channel (ticket threads, briefs, triage). telegram (default) or teamhub (post-only, vault name
+# 'teamhub-hub' = the Teamhub inbound-webhook URL; NO client data is ever posted there). Client-send APPROVALS stay on the
+# Telegram approval gateway whichever you pick. See twin_agent/hub/team_bus.py.
+team_bus: telegram
+# team_links:
+#   odoo_ticket: "https://helpdesk.example.com/odoo/helpdesk/{tid}"   # optional link added to the Teamhub brief
+send_enabled: false              # 06 F7. True only after consent D1 + guard self-test (06 I4)
+
+people:
+  principal_tg_user_id: 0            # only this id may approve a send as Principal (red-team #3)
+  principal_name: "Principal"
+  backup_tg_user_ids: []         # get info cards + Take over only
+  backup_names: ["Supervisor", "Riley"]
+  supervisor_tg_user_id: 0            # helpdesk stage gate: only her tap moves a ticket into a client-emailing stage
+  riley_tg_user_id: 0             # comms backbone: Riley's account may order decisions (doc 10 who-can-order)
+  executive_tg_user_id: 0           # comms backbone: Executive's account = owner-level (doc 10 who-can-order)
+  bot_display_name: "Principal's Agent"
+
+# Comms backbone (doc 15 "internal task assignments"): route an inbound message, authorise the sender by their
+# ACCOUNT id above, and open a VISIBLE Claude session in a Windows Terminal tab per lane. OFF by default.
+# With enabled + live_launch false it is OBSERVE-only: it writes each lane's INBOX.md and returns the exact
+# wt.exe command, but opens no tab and sends nothing (the single Sender stays the only thing that posts).
+comms:
+  enabled: false
+  live_launch: false             # true (+ run_mode live) actually runs wt.exe; apply_mode('observe') forces off
+  chat_ids: []                   # the comms chats (Acme Team group id / topics). Empty = acts nowhere, even
+                                 # when enabled, so it never fires on a client channel like Odoo x Globex.
+
+# Allow-list (05 1.1). Events from any other chat are dropped in memory, never logged or stored.
+chats:
+  - name: "Odoo x Globex"
+    chat_id: 0                   # from the telegram-triage desk SKILL.md
+    kind: group                  # group | dm
+    company: EG
+    read: true
+    topics:                      # topic_id: name (0 = fill in)
+      - {id: 0, name: "Logistics", company: EG}
+      - {id: 0, name: "Stores", company: EG}
+  - name: "Saudi Setup"
+    chat_id: 0
+    kind: group
+    company: KSA
+    read: false                  # only if Principal says yes (06 B6.2)
+    topics: []
+  - name: "Acme Team"          # internal team group: cards only when someone pings Principal
+    chat_id: 0
+    kind: group
+    read: false
+    topics: []
+    tagged_only: true            # pass only an @mention of Principal, a reply to his message, or a tag_handle
+    tag_handles: []              # e.g. ["@his_bot"]
+    tag_user_ids: []             # e.g. [his bot's user id]: a reply to a message from one of these is for him
+    tag_names: []                # e.g. ["Principal", "اليكس"]: his name as a whole word ("@Principal" too), any case
+    holding: false               # no automatic holding reply (agents never message people in this group)
+    auto_ticket: false           # no helpdesk ticket by itself
+
+mailboxes:
+  ticketmail:                    # mailbox Acme maps to partner 908 (06 B6.5)
+    address: ""
+    vault_name: gmail-ticketmail-refresh
+    scopes: [gmail.readonly]     # gmail.compose from day 3
+    poll_seconds: 120
+  globex:
+    address: ""
+    vault_name: gmail-globex-refresh
+    enabled: false               # needs the Globex Workspace admin (05 B #5)
+    scopes: [gmail.readonly]
+    poll_seconds: 120
+
+# Trust ladder per lane (05 9.1). Values: off | observe | draft | auto_on_timeout | auto
+dial:
+  L1_holding: observe
+  L2_evidence_ask: observe
+  L3_t1_answer: observe
+  L4_t2a_fix_proposal: observe
+  L5_t2b_config: observe
+  L6_ticket_email: "off"
+  L7_ticket_chase: "off"
+  L8_approver_question: observe
+  L9_worked_followup: "off"
+  L10_proof_video: "off"
+  L11_internal_diagnosis: auto   # internal only: cards to Principal
+  L12_email_reply: "off"
+
+# Timers (05 2.3). Minutes unless the key says otherwise. Clock: Africa/Cairo.
+timers:
+  tz: Africa/Cairo
+  working_days: [sun, mon, tue, wed, thu]
+  working_hours: {start: "10:00", end: "18:00"}
+  quiet_hours: {start: "22:00", end: "08:00"}
+  tick_seconds: 30
+  stalled_after_min: 10
+  burst: {quiet_min: 3, cap_min: 30}
+  worker: {target_min: 8, hard_stop_min: 15, retry_after_min: 2}
+  reminder: {in_hours_min: 40, out_of_hours_min: 10}
+  holding: {in_hours_min: 60, out_of_hours_min: 15}
+  verified_answer: {in_hours_min: 60, out_of_hours_min: 30}
+  escalate_backup: {in_hours_min: 180, out_of_hours_next_working_at: "10:15", fully_blocked_min: 30}
+  takeover_backup_min: 180
+  human_active_lock_min: 5
+  evidence_chase: {first_min: 1440, second_min: 4320, park_recheck_days: 7}
+  email_holding: {in_hours_min: 240, out_of_hours_min: 120}
+  promised_update: {card_working_days_before: 1}
+  approval_card: {reping_min: [30, 120], expire_min: 1440, out_of_hours_reping_at: "10:15"}
+  supervisor_review_working_hours: 4
+  worked_chaser: {first_min: 120, second_min: 1440, out_of_hours_at: "10:30"}
+  reopen_window: {days: 14, kpi_hours: 48}
+  answered_close: {working_hours: 48}   # close_rules.close_answered_silent
+  ticket_readback: {first_min: 15, second_min: 30}
+  ticket_idle_working_days: 3
+  client_question: {hours: 24, cron66_warning_days: 5}
+  client_testing_proof_working_days: 1
+  sla: {telegram_hours: 48, email_days: 7, card_at_fraction: 0.75}
+  sweep: {light_min: 15, full_min: 120, digest_at: "09:30", weekly_recheck: "sun 10:30", scorecard: "sun 10:00"}
+  paused_recard_min: 120
+  catchup_stagger_seconds: 20
+  snooze: {minutes: 30, max_count: 2}
+  heartbeat_seconds: 60
+  deadman_ping_min: 5
+  watchdog_stale_min: 3
+
+holidays: []                     # ["2026-11-05", ...] Cairo dates; also config\holidays.yaml
+
+# Code guards (05 3.4)
+guards:
+  rate:
+    per_request_min_gap_min: 10
+    per_request_per_day: 3
+    per_chat_per_hour: 10
+    total_per_day: 40
+    holding_per_request: 1
+  cards_per_hour: 10
+  spawn:
+    max_parallel_workers: 2
+    worker_runs_per_request: 3
+    check_calls_per_request: 6
+    claude_calls_per_day: 60
+  tickets: {per_part: 1, per_day: 5, recipients: ["help@example.com"]}
+  loop_guard_max_age_hours: 72
+  link_allow:
+    - "https://helpdesk.example.com/"
+    - "https://wiki.example.com/share/"
+    - "https://globex.odoo.com/"
+  promise_words: ["today", "in 1 hour", "in an hour", "guaranteed", "will be fixed by", "tomorrow"]
+  # Regexes for system text. "error" alone is blocked, but not "Send the validation error please" (07 3.3).
+  system_text:
+    - "NO_REPLY"
+    - "Traceback \\(most recent call last\\)"
+    - "(?i)^\\s*(error|exception)\\b[:\\s]"
+    - "(?i)\\b\\w+(Error|Exception):"
+    - "mcp__|tool_use|tool_result"
+    - "^\\s*[\\[{]"
+    - "^\\s*(null|None|undefined)\\s*$"
+
+# Consent and gates (05 3.1). Real refs live in config\consent.yaml on the laptop (gitignored).
+consent:
+  d1_ref: null                   # signed D1 document reference
+  channels: {telegram: false, email: false, tickets: false, whatsapp: false}
+  d2_voice_ref: null             # Principal's written voice consent (D2). Voice needs d1_ref + this + voice.enabled
+  b17_staff_data_to_claude: false  # 06 B1.7: if false, workers run on the replay export only
+  notice_gate:
+    sysadmin_b1_ref: null           # Sysadmin's written confirmation of 05 App. B #1
+    executive_b2_ref: null          # Executive told in writing (05 App. B #2)
+  signatory_must_approve: false     # if Principal answers B1.1 so, autopilot stays observe
+  d4_watcher_ref: null           # Principal's written Watcher consent (D4); the Watcher stays off without it
+
+# Voice notes in Principal's cloned voice (ElevenLabs -> OGG/Opus). Off until D2 is signed (consent.d2_voice_ref).
+# Persona rule: short replies only (holding, "try again now", a quick explanation); never numbers-heavy or
+# sensitive text, never Franco (the TTS cannot say it). Every send still goes through sender.py and the guards.
+voice:
+  enabled: false
+  autopilot: false               # true = timeout / holding-floor sends may be voice too; else only Principal's tap
+  lanes: [L1_holding, L3_t1_answer, L9_worked_followup]
+  langs: [en, ar]
+  max_chars: 300
+  max_words: 55
+  max_digits: 4
+  caption: "AI voice of Principal's assistant"   # disclosure on every voice note
+  model: eleven_multilingual_v2
+  vault_name: elevenlabs         # JSON {"api_key": ..., "voice_id": ...}
+  monthly_char_cap: 20000        # ElevenLabs characters per Cairo month; cache hits are free
+  ffmpeg: ffmpeg                 # path or name on PATH
+
+# Proof-video pipeline (proof/pipeline.py, 15 steps 4/6/7/8). Every REAL step stays blocked until run_mode: live
+# AND its own key/dep/clearance is present; in observe nothing is captured, synthesised or uploaded. The adapters
+# reuse the ShipShape kit (record.py, tts.py, video_trim.py, notify.py) - they do not fork it.
+proof:
+  kit_path: "C:\\twin-dev\\proof-kit"   # the ShipShape kit checkout (reuse, do not fork)
+  capture_base: ""               # a NON-Odoo sandbox host (e.g. https://sandbox.example.test); an Odoo host is
+                                 #   refused (Odoo is API-only, S7). EMPTY keeps capture blocked (flow safety);
+                                 #   capture is always pinned to this host at the
+                                 #   record.py command level (--base-url / --allow-host), never a plan's own base_url.
+  capture_is_live: false         # true only if the capture target holds live client production data -> upload refused
+  cleared: []                    # blocker keys Sysadmin/Principal record cleared: voice | wiki_key | qa_user |
+                                 #   shopify_keys | shipshape_gaps | flow  (flow is NOT clearable here - set capture_base)
+  voice_id: ""                   # ElevenLabs voice id for Principal's clone; EMPTY keeps narration blocked (no fabrication)
+  tts_voice: "ar-EG-ShakirNeural"  # kit edge-TTS voice. WARNING: clearing the 'voice' blocker today narrates with
+                                 #   THIS edge voice, NOT Principal's ElevenLabs clone (the kit has no single-clip
+                                 #   ElevenLabs CLI yet) - do not clear 'voice' until a real clone path exists.
+  trim: false                    # run kit video_trim.py on the capture before muxing (record.py already trims)
+  qa_config: ""                  # optional path passed to record.py --config (its default is <kit>/qa.config.yaml)
+  ocr_engine: auto               # LOCAL frame/screenshot OCR engine for the privacy scan (proof/ocr.py), OFFLINE only:
+                                 #   auto = Windows.Media.Ocr (winsdk/winrt) then tesseract | windows | tesseract | none.
+                                 #   No local engine installed (or 'none') => a real capture's frame_texts stays None and
+                                 #   the privacy step FAILS CLOSED (never fabricated, never a cloud/network OCR).
+  share_public: false            # request the public wiki.example.com/share link ONLY when true AND no security findings
+  wiki_base: ""               # override the Wiki API base (empty = https://wiki.example.com)
+  plans:                         # record.py QA plan JSON paths (BEFORE = the repro, AFTER = the fix / how-to)
+    before: ""
+    after: ""
+  projects: {}                   # client -> Wiki projectId. The kit has NO folder/project CREATE endpoint.
+  folders: {}                    # ticket_ref -> EXISTING Wiki folder_id; absent = upload to the project root
+
+# WhatsApp Business Cloud API (official Meta API only). Off; not wired into the sender yet.
+whatsapp:
+  enabled: false
+  vault_name: whatsapp-cloud     # JSON {"token": ..., "phone_number_id": ...}
+  graph_version: ""              # Graph API version, e.g. from Meta's changelog; empty = adapter refuses
+  window_hours: 24               # free-form text/audio only inside the customer-service window
+  allowed_recipients: []         # wa ids (digits), filled on the laptop only
+
+# Closing rules (closing.py). A closed request reopens on "still" / "لسه" / "??" within timers.reopen_window.
+# Every close by a rule posts one silent "done" card and is listed in the 09:30 digest. Nothing is ever sent.
+close_rules:
+  close_on_ack: true             # requester's "تمام" / "تمام كده" / "اشتغل" / "done" / "ok thanks" / 👍 closes:
+                                 #   after proof (PROOF_SENT) -> CLOSED_PROVEN; after Principal's own answer -> CLOSED_ANSWERED
+  close_answered_silent: true    # Principal answered an informational request, requester silent 48 working h -> CLOSED_ANSWERED
+  informational_tiers: [T1]      # which tiers count as "informational" for the silence close
+  ack_reactions: ["👍", "👌"]    # reactions that count as "worked, thanks" (only from the requester)
+  close_silent_quickfix: false   # 05 App. B #3 (Sysadmin decides): quick fix + re-read passed + 2 "worked?" pings that
+                                 #   really went out + silence -> CLOSED_REREAD_PROVEN. false = weekly "worked?" check
+  reread_proven_accepted: false  # older name of close_silent_quickfix (either one true turns it on)
+
+fix_gate:
+  b5_exempt_classes: []          # runbook slugs Principal names in 06 B5 (Supervisor exemptions)
+
+persona:
+  marker: "- Principal's assistant"
+  holding_templates: data/kb/persona/holding.yaml
+  telegram_langs: [en, franco]
+  email_langs: [en]
+
+claude:
+  binary: claude
+  config_dir: claude-config      # relative to home; CLAUDE_CONFIG_DIR for workers only
+  model: ""                      # worker/author model; blank = CLI default. The refuter picks a DIFFERENT model (see verify)
+  max_turns: 40
+  worker_timeout_seconds: 900
+  allowed_tools: "Read,Grep,Glob,mcp__kb_search__*,mcp__tg_history__*,mcp__submit_packet__*,mcp__odoo_client_read__search_read,mcp__odoo_client_read__read,mcp__odoo_client_read__fields_get"
+  disallowed_tools: "Bash,PowerShell,Write,Edit,NotebookEdit,WebFetch,WebSearch,mcp__odoo-ro__*,mcp__telegram-ro__*,mcp__gmail-ro__*,mcp__claude-in-chrome__*,mcp__playwright__*,mcp__odoo-stagelatest__*"
+  mcp_config: config/worker-mcp.json
+  settings: config/worker-settings.json
+  read_user_exists: false        # Globex least-privilege read user (05 B #4)
+
+# Independent adversarial verification (17): a deterministic evidence gate in code PLUS an independent refuter.
+# Cures the yes-man problem - Claude checking itself in one session drifts to agreement. The evidence gate is the
+# hard guard (a claim needs a record id / file:line / reproduction; "looks fine" never passes); the refuter can
+# VETO, never rescue. With no refuter available the agent degrades to "single-model" (evidence gate + Claude
+# judges only) and every card says so - it NEVER refute-alls.
+#
+# backend:
+#   claude (DEFAULT) = an INDEPENDENT in-subscription Claude session (claude -p, fresh, adversarial prompt) on a
+#                      DIFFERENT model than the worker. Strong, free, in-subscription, NO third-party egress -
+#                      allowed in observe. This is the default because a tiny local model is a poor reasoner.
+#   groq             = an OPTIONAL capable NON-Claude EXTERNAL model. Gated to run_mode == live + a 'groq' key +
+#                      the SDK; only a MINIMISED, redacted, structural payload (no free text, no staff names)
+#                      leaves the machine. A future server-side 70B-class model would slot in here too.
+verify:
+  cross_model_enabled: true      # false = no independent refuter at all (evidence gate + Claude judges only)
+  backend: claude                # claude (default, independent in-subscription session) | groq (optional, live)
+  refuter_model: ""              # Claude model id the refuter session pins; blank = pick one DIFFERENT from the worker
+  panel: []                      # optional: e.g. [opus, sonnet] = a 2-session panel; a claim survives only if BOTH fail to refute
+  refuter_timeout_seconds: 300   # the independent Claude refuter session timeout
+  groq_model: llama-3.3-70b-versatile   # only used when backend: groq
+  timeout_seconds: 30            # groq timeout; fail-closed (NOT verified) on timeout
+
+board:
+  host: 127.0.0.1
+  port: 8765
+  refresh_seconds: 10            # token is generated at start and shown only in /board
+
+deadman:
+  vault_name: deadman-url        # ping every timers.deadman_ping_min; no data in the ping
+
+kb_sources:                      # filled on the laptop; replay/tests use fixtures
+  runbook: ""
+  triage_dir: ""
+  memory_dirs: []
+  telegram_exports: []
+  email_dir: ""
+
+# The Watcher (HANDOFF 2026-11-02): learns Principal's work fingerprint. Everything is OFF. It needs Principal's written
+# consent D4 (consent.d4_watcher_ref), watcher.enabled AND the capability's own switch. Principal's /pause in the bot
+# stops it (the paused stretch is never exported); the board and /status show what it is doing. Work requests
+# only: no keystrokes, no personal chats, no passwords. CONTRACT "Changes" (WATCHER).
+watcher:
+  enabled: false
+  capture:                       # read from what the agent already stores for a request (state.db)
+    card_edits: false            # his taps, instructions to cards, agent draft vs what went out under his name
+    outgoing_messages: false     # his own messages in allow-listed chats, with reply timing
+    shell: false                 # commands / outputs he pastes back after "Show fix block" / "I ran it"
+    desk_sessions: false         # his ~/.claude/projects sessions, ONLY tagged ones or ones naming the REQ ref
+    time_spent: false
+  desk:
+    projects_dir: ""             # empty = ~/.claude/projects (never the workers' claude-config)
+    tagged_sessions: {}          # {session_id: REQ-0001} for sessions he tags by hand
+  screen_record:                 # opt-in, per ticket: python -I aa.py watcher record REQ-0001 --seconds 300
+    enabled: false
+    window_title: ""             # gdigrab title=... (one window); the whole desktop is refused...
+    allow_desktop: false         # ...unless this is set on purpose
+    fps: 5
+    ffmpeg: ffmpeg
+  outbox: data/watcher/outbox    # redacted case bundles (relative to home); its own git repo
+  sync:
+    enabled: false
+    remote: ""                   # Sysadmin's private git remote (ssh over Tailscale or a private repo); empty = no push
+    branch: main
+    interval_minutes: 0          # the listener exports + syncs every N minutes; 0 = manual only (aa.py watcher sync)
+  digest:                        # Sysadmin's side: watcher analyse --send-digest
+    sysadmin_tg_user_id: 0
+    vault_name: tg-bot-token
+
+# Twin Monitor (flight recorder + auditor, read-only). Principal's side: aa.py monitor export. Sysadmin's side: analyse,
+# report, incident, scorecard. Gated by the Watcher's consent D4 (consent.d4_watcher_ref) + monitor.enabled.
+monitor:
+  enabled: false
+  interval_minutes: 0            # the listener exports (+ syncs) every N minutes; 0 = manual only
+  outbox: data/monitor/outbox    # redacted ops bundles (metadata only); its own git repo, never this repo
+  sync:
+    enabled: false
+    remote: ""                   # Sysadmin's private git remote; empty = no push
+    branch: main
+  delivery:                      # Sysadmin's side: --send posts to Sysadmin's own bot (never as Principal)
+    sysadmin_tg_user_id: 0
+    vault_name: monitor-bot-token
+  targets: {in_hours_min: 60, out_of_hours_min: 15}   # first-reply targets ("never on hold")
+  divergence_below: 0.5          # edited draft vs final similarity that raises an alert
+  max_alerts_per_run: 10         # one message each; the rest go in one summary
+  odoo_ratings: 0                # Odoo helpdesk ratings count (none exist today)
+  dev:                           # Principal's own dev work, from the push-trace outputs (read-only)
+    trace_dir: ""                # e.g. ../research/globexfinal-gh (rows.json, pr_details.json, optional builds.json)
+    author_match: principal          # push-trace author label to match (lower case)
+    github_logins: []            # Principal's GitHub login(s)
+    gate_logins: []              # reviewers whose review counts as the gate
+    live_logins: []              # who may approve / merge a live push
+
+# ---------------------------------------------------------------- Digital Twin: Odoo writes (2026-11-03)
+# Acme' own Odoo 18 (helpdesk.example.com), as Principal: his API key in the vault as odoo-sys-principal
+# ({"login", "api_key"}; python -I aa.py creds set odoo-sys-principal). Writes need run_mode live AND each
+# section's write_enabled; `listener --mode observe` forces both off. Every write is a Monitor write event.
+odoo_sys:
+  url: ""                        # https://helpdesk.example.com
+  db: ""
+
+# Helpdesk tickets "like Supervisor" (TICKET-STYLE). Off by default; with enabled + write_enabled false the desk
+# offers ticket cards and records "prepared" writes only.
+helpdesk:
+  enabled: false
+  write_enabled: false
+  offer_on_lanes: [L4_t2a_fix_proposal, L5_t2b_config]   # offer a ticket card when these lanes finish checks
+  safe_stage_ids: [12, 14, 6, 18, 16, 9]   # 02h 2.2; confirmed at runtime (no mail template) or treated as emailing
+  analyst:                       # Ticket Analyst: route each ticket the twin creates to Functional (2) / Dev Requested (6)
+    enabled: false
+    notify_partner_id: 0         # the owner's partner: the routed-ticket email goes to this partner only
+    open_url: "http://127.0.0.1:8766/open"   # "Open as a session in Claude Code" (helpdesk/open_server.py)
+    open_port: 8766
+    timesheet:                   # one line per ticket routed: 'Routing: <stage> - <reason>'
+      enabled: false
+      hours: 0.25
+      employee_id: 0
+      project_id: 0
+  create_stage_id: 14          # new tickets start here (silent); stage 1 New emails the client
+  new_stage_id: 1                # the "New" stage; a ticket sitting here is auto-advanced to create_stage_id on identify
+  team_id: 0                     # 0 = Supervisor's most common team (runtime)
+  priority: null                 # null = Supervisor's most common priority (runtime)
+  supervisor_user_id: 0               # 0 = find res.users by supervisor_name
+  supervisor_name: "Supervisor"
+  partner_ids: {}                # {EG: <res.partner id>} ; else partner_names is searched
+  partner_names: {}              # {EG: "client name in Odoo"}
+  default_tags: []
+  runbook_trust: {}              # {runbook-entry-id: GREEN|AMBER|RED}; default AMBER (Principal's runbook)
+
+# Read-only API access to Globex's databases for workers (channels/mcp_odoo_client_read.py). Never a browser, never a
+# write. Needs run_mode live, enabled: true, consent.b17_staff_data_to_claude and the vault entry odoo-client-read
+# ({"login", "api_key"}). Dispatch-5's address changes after every push: update it here.
+odoo_client:
+  enabled: false
+  extra_models: []               # models to allow beyond the built-in list, e.g. mail.message; key, staff and bank models stay refused
+  targets:
+    production: {url: "", db: ""}
+    dispatch5: {url: "", db: ""}
+    stagelatest: {url: "", db: ""}
+
+# Automatic descriptive timesheets from Principal's real active time. Needs consent D4 (consent.d4_watcher_ref).
+timesheets:
+  enabled: false
+  write_enabled: false
+  projects_dir: ""               # empty = ~/.claude/projects (streamed; never the workers' claude-config)
+  idle_gap_minutes: 10           # a gap over this is idle and excluded
+  max_unattended_minutes: 10     # assistant activity counts only this long after Principal's own last action
+  tail_minutes: 1                # time to read the last output of an interval
+  min_minutes: 8                 # below this a ticket-day is listed but not logged (rounds to 0 h)
+  card_hour: 18                  # Cairo hour for the daily card
+  path_map: {}                   # {"<path fragment>": <ticket id>} for file-based attribution
+  autopilot: false               # auto-approve ONLY when eligible: 14 days, >90% unchanged approvals
+  autopilot_days: 14
+  autopilot_min_cards: 10
+  autopilot_share: 0.9
+
+# Dedicated "Digital Twin" Chrome profile (scripts/digital-twin-browser.ps1). CDP on 127.0.0.1 only.
+browser:
+  cdp_port: 9334
+  user_data_dir: ""              # empty = <home>\browser\DigitalTwin (C:\TwinAgent\browser\DigitalTwin)
+  bitwarden: false               # use the Bitwarden CLI (bw) for site logins when present
+  history:
+    enabled: false               # the Watcher may read the profile's History (copied, read-only); needs D4
+    work_domains: [helpdesk.example.com, github.com, example.com]
+
+# Memory / learning (twin_agent/memory, data/memory.db). Local-only, redacted, OBSERVE-safe: recall injects
+# past cases + system-map facts + correction rules into each worker's folder as recall.md (hints, read-only).
+# It is never a send or write path. recall_enabled default on; turn it off to run the worker without memory.
+memory:
+  recall_enabled: true
+  recall_k: 3
+
+teamhub:                           # Principal 2026-11-15: only what is sent to him on Teamhub (mentions, @room, DMs)
+  enabled: false
+  workspace: ""                  # Teamhub workspace id
+  cli: ""                        # empty = %USERPROFILE%\.teamhub\bin\teamhub.cmd
+  poll_seconds: 60
+  notify: true                   # Windows notification next to the card in data/claude_inbox.jsonl
+
+# WhatsApp support hub (twin_agent/hub) - keys read from the hub cfg dict. All optional unless marked.
+# hub:
+#   phone_number_id: "<Meta phone number id>"   # REQUIRED: changes for any other number are ignored (fails closed)
+#   approver_tg_ids: [111, 222]                 # Telegram ids allowed to approve/reassign besides the ticket owner
+#   approval_ttl_hours: 24                      # client-send approvals (confirm/resolve/reply/status)
+#   internal_approval_ttl_days: 14              # owner-only steps (advance/fix_ready/reopen)
+#   reopen_days: 7                              # a message within N days of RESOLVE asks the owner "reopen / keep closed /
+#                                               # new issue"; after N days (or keep-closed) a NEW ticket opens, LINKED to the
+#                                               # previous one ("Follows up #N" in Odoo, "linked to #N" in the Telegram brief)
+#   fallback_ack_seconds: 60                    # if the normal ack (needs analysis + Odoo ticket + Telegram) is not out after
+#                                               # N seconds, send ONE templated ack with no ticket number (the owner-approved
+#                                               # CONFIRM carries #N). 0 or null disables it. Never both acks for one ticket.
+#   window_hours: 24                            # WhatsApp customer-service window
+#   processing_timeout_s: 300                   # an in-flight message older than this is retried by the tick
+#   # --- per-person Odoo credentials (twin_agent/hub/odoo_people.py): each Odoo action runs AS the ticket owner ---
+#   odoo_people:                                # Odoo UID -> vault secret name (by uid, never by display name)
+#     101: odoo-principal                           # placeholder uids; use the live res.users ids
+#     102: odoo-supervisor
+#   odoo_automation: odoo-automation            # the intake / unassigned account (create, assign, linked follow-up)
+#   odoo_automation_uid: 100                    # the uid that account MUST log in as (else the action is refused)
+#   odoo_tg_people: {1003: 102}                 # Telegram id -> Odoo uid: who a reassign / client email runs as (unmapped = BLOCKED)
+#   odoo_fallback_to_automation: false          # default false: a missing owner key BLOCKS the action (retried later).
+#                                               # true = act as automation instead; audited acting=automation,
+#                                               # on_behalf_of=<owner key>, reason=no_key
+#   secrets_dir: ""                             # optional (a PC): folder of <name>.json files read through the creds layer;
+#                                               # empty = the vault. No default path.
+#   # INTERIM: until the others send their keys, the secret "odoo-riley" can be the automation account too:
+#   #   odoo_automation: odoo-riley   and   odoo_automation_uid: <the uid that key logs in as>
+#   # (secrets hold {"login", "api_key"} plus url/db in odoo_sys; never put a real key or login in this file)
+#   # --- client follow-ups by EMAIL from the helpdesk team alias (twin_agent/hub/client_email.py) ---
+#   client_channel: email                       # "email" (DEFAULT) | "whatsapp" (legacy). Email: confirm/status/question/resolution
+#                                               # go as an Odoo comment from the alias after the owner's tap; the instant ack is
+#                                               # the only automatic WhatsApp message.
+#   email_from_by_team: {2: "help@example.com"} # helpdesk team id -> sender alias (team 2 "Helpdesk Support")
+#   email_from_default: "info@example.com"      # a team with no alias (team 11 "Customer Inquiries")
+#                                               # These addresses are the ONLY senders the guard accepts.
+
+# Teamhub ticket threads (twin_agent/hub/teamhub_threads.py; rules in docs/TEAMHUB-TICKET-THREAD-RULES.md).
+# One Odoo helpdesk ticket = ONE thread in the owner's tickets room. Posting goes through the Teamhub automation
+# "Twin ticket poster" (queue files + a trigger). Approving a card NEVER sends anything to a client. No secrets here:
+# the Odoo key stays in the secrets file named below.
+teamhub_tickets:
+  room_id: "a00000000001"                  # the private room sysadmin-tickets
+  workflow_id: "a00000000007"              # the Twin ticket poster automation
+  teamhub_exe: "~/.teamhub/bin/teamhub.exe"
+  workdir: "~/.teamhub/agents/c00000000004/workdir"   # queue = <workdir>/relay-queue-tickets, results = <workdir>/out/tickets
+  state_dir: "~/.teamhub/twin-ticket-state"             # SQLite: ticket -> thread map, approvals, watermark
+  wait_seconds: 90
+  trigger_retries: 2
+  approval_ttl_hours: 24
+  odoo_secret_file: "~/.claude/secrets/odoo-riley.json"         # {url, db, login, api_key}; read-only use
+  # odoo_link_template: "https://helpdesk.example.com/web#id={tid}&model=helpdesk.ticket&view_type=form"   # default: built from the Odoo url
+  filter:                                  # REQUIRED: with no filter the watcher refuses to run
+    team_id: 2                             # Helpdesk Support
+    name_like: "TEST \u00b7%"              # only TEST tickets, until Sysadmin lifts the privacy rule
+  approvers:                               # teamhub user id -> name (the only people who can press a card)
+    user_EXAMPLE_APPROVER_ONE: "Sysadmin"
+    user_EXAMPLE_APPROVER_TWO: "Executive"
+  approver_allowlist: ["user_EXAMPLE_APPROVER_ONE", "user_EXAMPLE_APPROVER_TWO"]
+  default_approver: "user_EXAMPLE_APPROVER_ONE"        # gets the card when the ticket has no mapped owner
+  owner_teamhub_ids: {}                      # odoo user id -> teamhub user id, e.g. {"7": "user_..."}
+  close_stage_id: 4                        # teamhub_test_ticket close: a folded stage of team 2 (4 Cancelled: a test is not "solved")
+  trust_scoped_card_target: false          # true: a press with no user id counts as the card's single target (Teamhub scopes the card)
+  test_partner_id: 0                       # REQUIRED for full client text: the TEST contact's Odoo id. 0 or unset = FAIL CLOSED:
+                                           # every ticket gets the safe summary only and no approval card.
+  gateway_check: true                      # one `teamhub gateway status` check before posting; a dead gateway refuses the run
+  # Per-person rooms (config only; NOT enabled). Owner's Odoo uid -> their own room, poster automation and approver.
+  # Real tickets there still get the safe summary only and no card.
+  # owner_rooms:
+  #   "7": {room_id: "a00000000008", workflow_id: "<principals poster id>", approver: "<teamhub user id>"}      # principals-tickets
+  #   "8": {room_id: "a00000000009", workflow_id: "<supervisors poster id>", approver: "<teamhub user id>"}      # supervisors-tickets

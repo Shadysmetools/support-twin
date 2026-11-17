@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Synthetic secrets used by unit tests"
+paths = ['^tests/']
